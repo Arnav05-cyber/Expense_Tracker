@@ -7,4 +7,3 @@ build/
 .gradle/
 *.log
 .DS_Store
-*.hprof
