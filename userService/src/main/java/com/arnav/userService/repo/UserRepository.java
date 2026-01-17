@@ -1,14 +1,14 @@
 package com.arnav.userService.repo;
 
 
-import com.arnav.userService.entities.UserInfoDto;
+import com.arnav.userService.entities.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends CrudRepository<UserInfoDto, String> {
+public interface UserRepository extends CrudRepository<User, String> {
 
-    Optional<UserInfoDto> findByEmail(String email);
+    Optional<User> findByEmail(String email);
 }
