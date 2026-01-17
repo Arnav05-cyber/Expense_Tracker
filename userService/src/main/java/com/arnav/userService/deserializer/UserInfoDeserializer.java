@@ -1,6 +1,6 @@
 package com.arnav.userService.deserializer;
 
-import com.arnav.userService.entities.UserInfoDto;
+import com.arnav.userService.dtos.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.kafka.common.serialization.Deserializer;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class  UserInfoDeserializer implements Deserializer<UserInfoDto> {
+public class  UserInfoDeserializer implements Deserializer<UserDto> {
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
@@ -17,14 +17,14 @@ public class  UserInfoDeserializer implements Deserializer<UserInfoDto> {
     }
 
     @Override
-    public UserInfoDto deserialize(String topic, byte[] data) {
+    public UserDto deserialize(String topic, byte[] data) {
         if (data == null || data.length == 0) {
             return null; // IMPORTANT
         }
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(data, UserInfoDto.class);
+            return objectMapper.readValue(data, UserDto.class);
         } catch (Exception e) {
             throw new RuntimeException("Error deserializing UserInfoDto", e);
         }

@@ -12,4 +12,8 @@ public class App {
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
     }
+
+    public Object getGreeting() {
+        return "Hello World!";
+    }
 }
