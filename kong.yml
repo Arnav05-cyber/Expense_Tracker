@@ -5,15 +5,19 @@ services:
     url: http://auth-service:9820
     routes:
       - name: auth-signup
+        strip_path: false
         paths:
           - /auth/v1/signup
       - name: auth-login
+        strip_path: false
         paths:
           - /auth/v1/login
       - name: auth-refresh-token
+        strip_path: false
         paths:
           - /auth/v1/refreshToken
       - name: auth-logout
+        strip_path: false
         paths:
           - /auth/v1/logout
 
@@ -21,8 +25,10 @@ services:
     url: http://user-service:9810
     routes:
       - name: user-create-update
+        strip_path: false
         paths:
           - /user/createUpdate
       - name: user-get-user
+        strip_path: false
         paths:
           - /user/getUser
