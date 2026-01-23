@@ -14,6 +14,8 @@ sequenceDiagram
     participant Kafka
     participant UserService
     participant UserDB
+    participant DsService
+    participant MistralAI
 
     Client->>AuthService: POST /signup
     AuthService->>AuthDB: Save User (Creds)
@@ -23,6 +25,12 @@ sequenceDiagram
     par Async Processing
         Kafka->>UserService: Consume Event
         UserService->>UserDB: Save User (Profile)
+    end
+
+    Client->>DsService: POST /v1/ds/message (Bank SMS)
+    DsService->>MistralAI: Extract Expense Info
+    MistralAI-->>DsService: JSON Data
+    DsService-->>Client: 200 OK (Expense Details)
     end
 ```
 
@@ -59,7 +67,14 @@ The codebase is structured for easy reuse in future projects:
 
 - **Consumer**: Listens to the `userEvents` topic. When a user signs up, it automatically creates a corresponding profile in the User DB.
 - **Service Layer**: Handles business logic for creating and retrieving detailed user information.
-- **API**: Exposes endpoints like `/getUser` for fetching profile details globally.
+
+### C. Data Science Service (`dsService`)
+
+**Responsibility**: Intelligent processing of data, specifically extracting expense information from Bank SMS messages using LLMs.
+
+- **Stack**: Python, Flask, Langchain.
+- **LLM Integration**: Uses **Mistral AI** (via Langchain) to parse unstructured SMS text into structured JSON data.
+- **API**: Exposes `/v1/ds/message` to accept SMS text and return structured expense objects.
 
 ## 🔧 Technical Stack
 
@@ -68,3 +83,4 @@ The codebase is structured for easy reuse in future projects:
 - **Messaging**: Apache Kafka
 - **Database**: MySQL
 - **Security**: Spring Security & JWT
+- **Data Science**: Python, Flask, Langchain, Mistral AI
