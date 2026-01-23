@@ -31,7 +31,6 @@ sequenceDiagram
     DsService->>MistralAI: Extract Expense Info
     MistralAI-->>DsService: JSON Data
     DsService-->>Client: 200 OK (Expense Details)
-    end
 ```
 
 ## 🌟 Key Features
