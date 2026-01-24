@@ -1,5 +1,6 @@
 CREATE DATABASE IF NOT EXISTS userservice;
 CREATE DATABASE IF NOT EXISTS authservice;
+CREATE DATABASE IF NOT EXISTS expenseservice;
 
 CREATE USER IF NOT EXISTS 'authuser'@'%' IDENTIFIED BY 'authpassword';
 GRANT ALL PRIVILEGES ON authservice.* TO 'authuser'@'%';
