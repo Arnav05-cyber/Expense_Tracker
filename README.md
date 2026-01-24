@@ -114,10 +114,16 @@ The codebase is structured for easy reuse in future projects:
 
 ### Running Locally
 
-1. **Start Infrastructure**:
+1. **Start Full Stack**:
+
    ```bash
-   docker-compose up -d mysql kafka kong
+   docker-compose up -d
    ```
-2. **Start Services**:
-   - Build and run `authService`, `userService`, and `expenseService` using Gradle.
-   - Run `dsService` using Python (`python __init__.py`).
+
+   This command starts the entire microservices ecosystem (MySQL, Kafka, Kong, Auth Service, User Service, Expense Service).
+
+2. **Start Data Science Service** (If needed):
+   - Navigate to `dsService` and run:
+     ```bash
+     python __init__.py
+     ```
