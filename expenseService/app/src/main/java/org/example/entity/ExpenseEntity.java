@@ -42,6 +42,9 @@ public class ExpenseEntity {
         if (this.externalId == null) {
             this.externalId = java.util.UUID.randomUUID().toString();
         }
+        if (this.createdAt == null) {
+            this.createdAt = new java.sql.Timestamp(System.currentTimeMillis());
+        }
     }
 
 }
