@@ -1,0 +1,107 @@
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+
+> Task :app:externalNativeBuildCleanDebug FAILED
+Clean react_codegen_safeareacontext-armeabi-v7a, appmodules-armeabi-v7a
+C/C++: CMake Error at C:/Expesne_Tracker/frontend/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:9 (add_subdirectory):
+C/C++:   add_subdirectory given source
+C/C++:   "C:/Expesne_Tracker/frontend/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/"
+C/C++:   which is not an existing directory.
+C/C++: Call Stack (most recent call first):
+C/C++:   C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: CMake Error at C:/Expesne_Tracker/frontend/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:12 (add_subdirectory):
+C/C++:   add_subdirectory given source
+C/C++:   "C:/Expesne_Tracker/frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/"
+C/C++:   which is not an existing directory.
+C/C++: Call Stack (most recent call first):
+C/C++:   C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: CMake Error at C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:97 (target_link_libraries):
+C/C++:   Cannot specify link libraries for target "react_codegen_rnreanimated" which
+C/C++:   is not built by this project.
+C/C++: Call Stack (most recent call first):
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: ninja: error: rebuilding 'build.ninja': subcommand failed
+
+[Incubating] Problems report is available at: file:///C:/Expesne_Tracker/frontend/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:externalNativeBuildCleanDebug'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `C:\Expesne_Tracker\frontend\android\app\.cxx\Debug\4i144d6d\armeabi-v7a'
+  [0/2] Re-checking globbed directories...
+  [1/2] Re-running CMake...
+  -- Configuring incomplete, errors occurred!
+  See also "C:/Expesne_Tracker/frontend/android/app/.cxx/Debug/4i144d6d/armeabi-v7a/CMakeFiles/CMakeOutput.log".
+  See also "C:/Expesne_Tracker/frontend/android/app/.cxx/Debug/4i144d6d/armeabi-v7a/CMakeFiles/CMakeError.log".
+  FAILED: build.ninja 
+  C:\Users\arnav\AppData\Local\Android\Sdk\cmake\3.22.1\bin\cmake.exe --regenerate-during-build -SC:\Expesne_Tracker\frontend\node_modules\react-native\ReactAndroid\cmake-utils\default-app-setup -BC:\Expesne_Tracker\frontend\android\app\.cxx\Debug\4i144d6d\armeabi-v7a
+  
+  C++ build system [clean] failed while executing:
+      @echo off
+      "C:\\Users\\arnav\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe" ^
+        -C ^
+        "C:\\Expesne_Tracker\\frontend\\android\\app\\.cxx\\Debug\\4i144d6d\\armeabi-v7a" ^
+        clean
+    from C:\Expesne_Tracker\frontend\android\app
+  CMake Error at C:/Expesne_Tracker/frontend/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:9 (add_subdirectory):
+    add_subdirectory given source
+    "C:/Expesne_Tracker/frontend/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/"
+    which is not an existing directory.
+  Call Stack (most recent call first):
+    C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+    CMakeLists.txt:31 (include)
+  
+  
+  CMake Error at C:/Expesne_Tracker/frontend/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:12 (add_subdirectory):
+    add_subdirectory given source
+    "C:/Expesne_Tracker/frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/"
+    which is not an existing directory.
+  Call Stack (most recent call first):
+    C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+    CMakeLists.txt:31 (include)
+  
+  
+  CMake Error at C:/Expesne_Tracker/frontend/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:97 (target_link_libraries):
+    Cannot specify link libraries for target "react_codegen_rnreanimated" which
+    is not built by this project.
+  Call Stack (most recent call first):
+    CMakeLists.txt:31 (include)
+  
+  
+  ninja: error: rebuilding 'build.ninja': subcommand failed
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.0.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 6s
+11 actionable tasks: 1 executed, 10 up-to-date
