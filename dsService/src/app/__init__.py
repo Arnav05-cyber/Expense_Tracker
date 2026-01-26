@@ -15,7 +15,7 @@ app.config.from_pyfile('config.py')
 messageService = MessageService()
 
 producer = KafkaProducer(
-    bootstrap_servers='localhost:9093',
+    bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9093'),
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 

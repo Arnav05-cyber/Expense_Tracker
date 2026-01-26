@@ -11,3 +11,11 @@ build/
 
 user_service_logs*.txt
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+dist/
+*.egg-info/
+dsvenv/

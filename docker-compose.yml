@@ -104,6 +104,20 @@ services:
       # Point to "kafka" container
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
+  ds-service:
+    image: ds-service:latest
+    container_name: ds-service
+    env_file:
+      - ./dsService/.env
+    environment:
+      FLASK_APP: app
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8002:8002"
+    depends_on:
+      kafka:
+        condition: service_started
+
   kong:
     image: kong:latest
     container_name: kong
