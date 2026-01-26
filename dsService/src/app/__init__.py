@@ -14,10 +14,23 @@ app.config.from_pyfile('config.py')
 
 messageService = MessageService()
 
-producer = KafkaProducer(
-    bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9093'),
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
-)
+import time
+
+def get_kafka_producer():
+    retries = 10
+    while retries > 0:
+        try:
+            return KafkaProducer(
+                bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9093'),
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            )
+        except Exception as e:
+            print(f"Failed to connect to Kafka: {e}. Retrying in 5 seconds...")
+            time.sleep(5)
+            retries -= 1
+    raise Exception("Could not connect to Kafka after multiple retries")
+
+producer = get_kafka_producer()
 
 @app.route('/v1/ds/message', methods=['POST'])
 def handle_message():

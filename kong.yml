@@ -48,3 +48,11 @@ services:
         strip_path: false
         paths:
           - /expense/v1/
+
+  - name: ds-service
+    url: http://ds-service:8002
+    routes:
+      - name: ds-message
+        strip_path: false
+        paths:
+          - /v1/ds/message

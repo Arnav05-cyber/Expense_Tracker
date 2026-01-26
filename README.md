@@ -114,16 +114,19 @@ The codebase is structured for easy reuse in future projects:
 
 ### Running Locally
 
-1. **Start Full Stack**:
+1.  **Start Full Stack**:
 
-   ```bash
-   docker-compose up -d
-   ```
+    ```bash
+    docker-compose up -d --build
+    ```
 
-   This command starts the entire microservices ecosystem (MySQL, Kafka, Kong, Auth Service, User Service, Expense Service).
+    This command starts the entire microservices ecosystem:
+    - **Infrastructure**: MySQL, Kafka, Kong Gateway
+    - **Services**: Auth Service, User Service, Expense Service, DS Service
 
-2. **Start Data Science Service** (If needed):
-   - Navigate to `dsService` and run:
-     ```bash
-     python __init__.py
-     ```
+2.  **Access APIs**:
+    - Access all services via the Kong Gateway at `http://localhost:8000`.
+    - **Auth**: `/auth/v1/...`
+    - **User**: `/user/...`
+    - **Expense**: `/expense/v1/...`
+    - **DS Service**: `/v1/ds/message`
