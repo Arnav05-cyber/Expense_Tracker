@@ -11,6 +11,7 @@ import CustomText from "@/components/CustomText";
 import { router, useNavigation } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/Config";
+import CustomModal from "@/components/Modal";
 
 const SignUp = () => {
   const [firstname, setFirstname] = useState("");
@@ -20,6 +21,7 @@ const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const navigateToLoginScreen = async () => {
     try {
@@ -40,21 +42,26 @@ const SignUp = () => {
         }),
       });
 
-      console.log("Response Status:", response.status);
       const text = await response.text();
-      console.log("Response Text:", text);
+      console.log("Raw Signup Response:", text); // Debug log
 
       if (response.ok) {
         const data = JSON.parse(text);
         await AsyncStorage.setItem("accessToken", data["accessToken"]);
         await AsyncStorage.setItem("refreshToken", data["token"]);
-        router.replace("/Home");
+        setShowModal(true);
       } else {
         console.error("Signup failed:", text);
+        // Could show error modal here logic if desired
       }
     } catch (error) {
-      console.log(error);
+      console.error("Signup error:", error);
     }
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    router.replace("/Home");
   };
 
   return (
@@ -112,7 +119,7 @@ const SignUp = () => {
 
         <Pressable
           style={styles.buttonContainer}
-          onPress={() => navigateToLoginScreen()}
+          onPress={navigateToLoginScreen}
         >
           <CustomBox style={buttonBox}>
             <CustomText style={styles.buttonText}>Submit</CustomText>
@@ -125,6 +132,11 @@ const SignUp = () => {
           </CustomBox>
         </Pressable>
       </ScrollView>
+      <CustomModal
+        isOpen={showModal}
+        onClose={handleModalClose}
+        message="Successfully Signed Up!"
+      />
     </View>
   );
 };

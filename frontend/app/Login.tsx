@@ -5,11 +5,13 @@ import CustomText from "@/components/CustomText";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/Config";
+import CustomModal from "@/components/Modal";
 
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setIsLoggedIn] = useState(false);
+  const [showModal, setShowModal] = useState(false); // 2. Add showModal state
 
   const isLoggedIn = async () => {
     const accessToken = await AsyncStorage.getItem("accessToken");
@@ -42,9 +44,14 @@ const Login = () => {
       const data = await response.json();
       await AsyncStorage.setItem("accessToken", data["accessToken"]);
       await AsyncStorage.setItem("refreshToken", data["token"]);
-      router.replace("/Home");
+      setShowModal(true); // 3. Update login success to show modal instead of routing immediately.
     }
     return response.ok;
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    router.replace("/Home");
   };
 
   const refreshToken = async () => {
@@ -78,6 +85,10 @@ const Login = () => {
         if (data["token"]) {
           await AsyncStorage.setItem("accessToken", data["accessToken"]);
           await AsyncStorage.setItem("refreshToken", data["token"]);
+          // Optional: Show modal here too? Usually auto-login is silent.
+          // User asked for "when user logs in", auto-refresh is implicit.
+          // We can skip modal for auto-refresh to be less annoying, or add it if requested.
+          // I will skip it for auto-refresh for now as it disrupts the "app opening" flow.
           return true;
         } else {
           console.error("No token in refresh response", data);
@@ -148,6 +159,12 @@ const Login = () => {
           <CustomText style={styles.buttonText}>Signup</CustomText>
         </CustomBox>
       </Pressable>
+
+      <CustomModal // 4. Add modal component to JSX
+        isOpen={showModal}
+        onClose={handleModalClose}
+        message="Successfully Logged In!"
+      />
     </View>
   );
 };
