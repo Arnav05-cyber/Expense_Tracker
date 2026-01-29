@@ -8,7 +8,7 @@ The system is split into two primary microservices: `authService` and `userServi
 
 ```mermaid
 sequenceDiagram
-    participant Client
+    participant Customer as Mobile App
     participant AuthService
     participant AuthDB
     participant Kafka
@@ -16,23 +16,25 @@ sequenceDiagram
     participant UserDB
     participant DsService
     participant MistralAI
+    participant ExpenseService
+    participant ExpenseDB
 
-    Client->>AuthService: POST /signup
+    Customer->>AuthService: POST /signup
     AuthService->>AuthDB: Save User (Creds)
     AuthService->>Kafka: Publish "UserCreated"
-    AuthService-->>Client: 200 OK (JWT)
+    AuthService-->>Customer: 200 OK (JWT)
 
     par Async Processing
         Kafka->>UserService: Consume Event
         UserService->>UserDB: Save User (Profile)
     end
 
-    Client->>DsService: POST /v1/ds/message (Bank SMS)
+    Customer->>DsService: POST /v1/ds/message (Bank SMS)
     DsService->>MistralAI: Extract Expense Info
     MistralAI-->>DsService: JSON Data
-    DsService-->>Client: 200 OK (Expense Details)
+    DsService-->>Customer: 200 OK (Expense Details)
 
-    Client->>DsService: POST /v1/ds/message
+    Customer->>DsService: POST /v1/ds/message
     DsService->>Kafka: Publish "ExpenseCreated" (Topic: expense_service)
     Kafka->>ExpenseService: Consume Event
     ExpenseService->>ExpenseDB: Save Expense
@@ -55,7 +57,12 @@ The codebase is structured for easy reuse in future projects:
 - **Decoupled Logic**: The `authService` focuses solely on credentials and tokens, while `userService` manages profile data. This separation of concerns allows either service to be plugged into other architectures.
 - **Configuration Driven**: All key settings (Database URLs, Kafka Topics) are externalized in `application.properties`, making environment switching seamless.
 
-## 🛠️ Microservices Overview
+### 3. Cross-Platform Mobile Experience
+
+- **Unified Codebase**: Built with **React Native** and **Expo**, providing a native experience on both iOS and Android from a single codebase.
+- **Modern UI**: Utilizes **Gluestack UI** and **NativeWind** for a beautiful, accessible, and responsive interface.
+
+## 🛠️ Microservices & Frontend Overview
 
 ### A. Auth Service (`org.example`)
 
@@ -89,9 +96,18 @@ The codebase is structured for easy reuse in future projects:
 - **Consumer**: Listens to the `expense_service` topic. Receiving expense data from `dsService` and persisting it.
 - **Database**: Stores expense records with support for multi-currency transactions.
 
+### E. Frontend (`frontend`)
+
+**Responsibility**: The user interface for the Expense Tracker.
+
+- **Stack**: React Native, Expo, TypeScript.
+- **Routing**: Expo Router for file-based routing.
+- **UI Architecture**: Component-based design components for reusability.
+
 ## 🔧 Technical Stack
 
-- **Language**: Java, Python
+- **Frontend**: React Native, Expo, TypeScript, Gluestack UI, NativeWind
+- **Backend Language**: Java, Python
 - **Framework**: Spring Boot, Flask
 - **Messaging**: Apache Kafka
 - **Database**: MySQL
@@ -111,10 +127,11 @@ The codebase is structured for easy reuse in future projects:
 | **Expense Service** | `9830` | Expense Management               |
 | **DS Service**      | `8002` | Python/AI Service (Local)        |
 | **Kafka (Local)**   | `9093` | Kafka Bootstrap for Host Machine |
+| **Frontend**        | `8081` | Metro Bundler (Default)          |
 
 ### Running Locally
 
-1.  **Start Full Stack**:
+1.  **Start Backend Services**:
 
     ```bash
     docker-compose up -d --build
@@ -124,7 +141,19 @@ The codebase is structured for easy reuse in future projects:
     - **Infrastructure**: MySQL, Kafka, Kong Gateway
     - **Services**: Auth Service, User Service, Expense Service, DS Service
 
-2.  **Access APIs**:
+2.  **Start Frontend Application**:
+
+    Navigate to the frontend directory and start the Expo server:
+
+    ```bash
+    cd frontend
+    npm install
+    npx expo start
+    ```
+
+    Scan the QR code with the Expo Go app (Android/iOS) or run on a simulator/emulator.
+
+3.  **Access APIs**:
     - Access all services via the Kong Gateway at `http://localhost:8000`.
     - **Auth**: `/auth/v1/...`
     - **User**: `/user/...`

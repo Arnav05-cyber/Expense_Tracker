@@ -1,0 +1,172 @@
+import {
+  StyleSheet,
+  TextInput,
+  View,
+  Pressable,
+  ScrollView,
+} from "react-native";
+import React, { useState } from "react";
+import CustomBox from "@/components/Box";
+import CustomText from "@/components/CustomText";
+import { router } from "expo-router";
+
+const SignUp = () => {
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phonenumber, setPhonenumber] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmpassword, setConfirmPassword] = useState("");
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <CustomBox style={signupBox}>
+          <CustomText style={styles.heading}>Signup</CustomText>
+          <TextInput
+            placeholder="First Name"
+            value={firstname}
+            onChangeText={setFirstname}
+            style={styles.input}
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="Last Name"
+            value={lastname}
+            onChangeText={setLastname}
+            style={styles.input}
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="Phone Number"
+            value={phonenumber}
+            onChangeText={setPhonenumber}
+            style={styles.input}
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="User Name"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+            placeholderTextColor={"black"}
+          />
+          <TextInput
+            placeholder="Confirm Password"
+            value={confirmpassword}
+            onChangeText={setConfirmPassword}
+            style={styles.input}
+            secureTextEntry
+            placeholderTextColor={"black"}
+          />
+        </CustomBox>
+
+        <Pressable
+          style={styles.buttonContainer}
+          onPress={() => console.log("Submit")}
+        >
+          <CustomBox style={buttonBox}>
+            <CustomText style={styles.buttonText}>Submit</CustomText>
+          </CustomBox>
+        </Pressable>
+
+        <Pressable style={styles.buttonContainer} onPress={() => router.back()}>
+          <CustomBox style={buttonBox}>
+            <CustomText style={styles.buttonText}>Login</CustomText>
+          </CustomBox>
+        </Pressable>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default SignUp;
+
+const signupBox = {
+  mainBox: {
+    backgroundColor: "white",
+    borderColor: "black",
+    borderRadius: 10,
+    borderWidth: 2,
+    padding: 20,
+    width: "100%",
+    minWidth: 300,
+  },
+
+  shadowBox: {
+    backgroundColor: "black",
+    borderRadius: 10,
+  },
+};
+
+const buttonBox = {
+  mainBox: {
+    backgroundColor: "white",
+    borderColor: "black",
+    borderRadius: 10,
+    borderWidth: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    alignItems: "center",
+  },
+
+  shadowBox: {
+    backgroundColor: "black",
+    borderRadius: 10,
+  },
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    width: "100%",
+    color: "black",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  buttonText: {
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+});

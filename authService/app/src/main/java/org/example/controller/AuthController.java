@@ -73,4 +73,13 @@ public class AuthController {
             return ResponseEntity.status(500).body("Logout failed: " + e.getMessage());
         }
     }
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication != null && authentication.isAuthenticated()){
+            return ResponseEntity.ok("pong");
+        }
+        return ResponseEntity.status(401).body("Unauthorized");
+    }
 }
