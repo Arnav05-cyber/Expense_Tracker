@@ -31,18 +31,27 @@ const SignUp = () => {
           "X-requested-with": "XMLHttpRequest",
         },
         body: JSON.stringify({
-          firstname: firstname,
-          lastname: lastname,
+          firstName: firstname,
+          lastName: lastname,
           email: email,
-          phonenumber: phonenumber,
-          username: username,
+          phoneNumber: phonenumber,
+          userName: username,
           password: password,
         }),
       });
-      const data = await response.json();
-      await AsyncStorage.setItem("accessToken", data["accessToken"]);
-      await AsyncStorage.setItem("refreshToken", data["refreshToken"]);
-      router.replace("/Home");
+
+      console.log("Response Status:", response.status);
+      const text = await response.text();
+      console.log("Response Text:", text);
+
+      if (response.ok) {
+        const data = JSON.parse(text);
+        await AsyncStorage.setItem("accessToken", data["accessToken"]);
+        await AsyncStorage.setItem("refreshToken", data["token"]);
+        router.replace("/Home");
+      } else {
+        console.error("Signup failed:", text);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -103,7 +112,7 @@ const SignUp = () => {
 
         <Pressable
           style={styles.buttonContainer}
-          onPress={() => console.log("Submit")}
+          onPress={() => navigateToLoginScreen()}
         >
           <CustomBox style={buttonBox}>
             <CustomText style={styles.buttonText}>Submit</CustomText>

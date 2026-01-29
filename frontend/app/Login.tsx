@@ -25,9 +25,8 @@ const Login = () => {
     return response.ok;
   };
 
-  const refreshToken = async () => {
-    const refreshToken = await AsyncStorage.getItem("refreshToken");
-    const response = await fetch(`${API_URL}/auth/v1/refreshToken`, {
+  const goToHomeWithLogin = async () => {
+    const response = await fetch(`${API_URL}/auth/v1/login`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -35,17 +34,61 @@ const Login = () => {
         "X-requested-with": "XMLHttpRequest",
       },
       body: JSON.stringify({
-        refreshToken: refreshToken,
+        userName: userName,
+        password: password,
       }),
     });
     if (response.ok) {
       const data = await response.json();
       await AsyncStorage.setItem("accessToken", data["accessToken"]);
-      await AsyncStorage.setItem("refreshToken", data["refreshToken"]);
-      const refreshToken = await AsyncStorage.getItem("refreshToken");
-      console.log(refreshToken);
+      await AsyncStorage.setItem("refreshToken", data["token"]);
+      router.replace("/Home");
     }
     return response.ok;
+  };
+
+  const refreshToken = async () => {
+    const refreshToken = await AsyncStorage.getItem("refreshToken");
+    console.log("Stored RefreshToken:", refreshToken);
+
+    if (!refreshToken) {
+      console.log("No refresh token found in storage.");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/v1/refreshToken`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-requested-with": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          refreshToken: refreshToken,
+        }),
+      });
+
+      console.log("RefreshToken Response Status:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("RefreshToken Response Data:", JSON.stringify(data));
+
+        if (data["token"]) {
+          await AsyncStorage.setItem("accessToken", data["accessToken"]);
+          await AsyncStorage.setItem("refreshToken", data["token"]);
+          return true;
+        } else {
+          console.error("No token in refresh response", data);
+          return false;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error("RefreshToken error:", error);
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -91,7 +134,7 @@ const Login = () => {
       </CustomBox>
       <Pressable
         style={styles.buttonContainer}
-        onPress={() => console.log("Submit")}
+        onPress={() => goToHomeWithLogin()}
       >
         <CustomBox style={buttonBox}>
           <CustomText style={styles.buttonText}>Submit</CustomText>
