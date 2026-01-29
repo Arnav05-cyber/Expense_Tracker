@@ -103,6 +103,8 @@ The codebase is structured for easy reuse in future projects:
 - **Stack**: React Native, Expo, TypeScript.
 - **Routing**: Expo Router for file-based routing.
 - **UI Architecture**: Component-based design components for reusability.
+- **Reusable Auth Module**: The `Login.tsx` and `SignUp.tsx` screens are designed to be plug-and-play for any project using this backend architecture. They only depend on `Config.ts` and generic UI components.
+- **Dynamic Configuration**: Includes `Config.ts` to automatically switch API URLs between `localhost` (iOS/Web) and `10.0.2.2` (Android Emulator), or detect the host IP for physical devices via Expo Go.
 
 ## 🔧 Technical Stack
 
