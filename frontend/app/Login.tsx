@@ -4,6 +4,7 @@ import CustomBox from "@/components/Box";
 import CustomText from "@/components/CustomText";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@/constants/Config";
 
 const Login = () => {
   const [userName, setUserName] = useState("");
@@ -12,7 +13,7 @@ const Login = () => {
 
   const isLoggedIn = async () => {
     const accessToken = await AsyncStorage.getItem("accessToken");
-    const response = await fetch("http://localhost:9898/ping", {
+    const response = await fetch(`${API_URL}/ping`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -26,7 +27,7 @@ const Login = () => {
 
   const refreshToken = async () => {
     const refreshToken = await AsyncStorage.getItem("refreshToken");
-    const response = await fetch("http://localhost:9898/auth/v1/refreshToken", {
+    const response = await fetch(`${API_URL}/auth/v1/refreshToken`, {
       method: "POST",
       headers: {
         Accept: "application/json",

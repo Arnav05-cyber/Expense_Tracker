@@ -8,7 +8,9 @@ import {
 import React, { useState } from "react";
 import CustomBox from "@/components/Box";
 import CustomText from "@/components/CustomText";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@/constants/Config";
 
 const SignUp = () => {
   const [firstname, setFirstname] = useState("");
@@ -18,6 +20,33 @@ const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
+
+  const navigateToLoginScreen = async () => {
+    try {
+      const response = await fetch(`${API_URL}/auth/v1/signup`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-requested-with": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          firstname: firstname,
+          lastname: lastname,
+          email: email,
+          phonenumber: phonenumber,
+          username: username,
+          password: password,
+        }),
+      });
+      const data = await response.json();
+      await AsyncStorage.setItem("accessToken", data["accessToken"]);
+      await AsyncStorage.setItem("refreshToken", data["refreshToken"]);
+      router.replace("/Home");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -66,14 +95,6 @@ const SignUp = () => {
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
-            secureTextEntry
-            placeholderTextColor={"black"}
-          />
-          <TextInput
-            placeholder="Confirm Password"
-            value={confirmpassword}
-            onChangeText={setConfirmPassword}
             style={styles.input}
             secureTextEntry
             placeholderTextColor={"black"}

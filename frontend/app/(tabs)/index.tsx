@@ -6,6 +6,7 @@ import {
 } from "@react-navigation/native";
 import Login from "../Login";
 import SignUp from "../SignUp";
+import Home from "../Home";
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -22,6 +23,12 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="SignUp"
             component={SignUp}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="Home"
+            component={Home}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
