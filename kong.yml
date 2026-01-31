@@ -23,6 +23,10 @@ services:
 
   - name: user-service
     url: http://user-service:9810
+    plugins:
+      - name: external-auth
+        config:
+          auth_url: http://auth-service:9820/ping
     routes:
       - name: user-create-update
         strip_path: false
@@ -35,6 +39,10 @@ services:
 
   - name: expense-service
     url: http://expense-service:9830
+    plugins:
+      - name: external-auth
+        config:
+          auth_url: http://auth-service:9820/ping
     routes:
       - name: expense-create
         strip_path: false

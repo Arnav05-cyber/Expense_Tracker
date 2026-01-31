@@ -74,11 +74,18 @@ public class AuthController {
     }
 
     @GetMapping("/ping")
-    public ResponseEntity<String> ping(){
+    public ResponseEntity<java.util.Map<String, Object>> ping() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication != null && authentication.isAuthenticated()){
-            return ResponseEntity.ok("pong");
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof org.example.service.CustomUserDetails) {
+                String userId = ((org.example.service.CustomUserDetails) principal).getUserId();
+                java.util.Map<String, Object> response = new java.util.HashMap<>();
+                response.put("userId", userId);
+                response.put("valid", true);
+                return ResponseEntity.ok(response);
+            }
         }
-        return ResponseEntity.status(401).body("Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
