@@ -46,10 +46,12 @@ const SignUp = () => {
       console.log("Raw Signup Response:", text); // Debug log
 
       if (response.ok) {
+        console.log("Signup successful, setting modal true");
         const data = JSON.parse(text);
         await AsyncStorage.setItem("accessToken", data["accessToken"]);
         await AsyncStorage.setItem("refreshToken", data["token"]);
         setShowModal(true);
+        console.log("setShowModal called");
       } else {
         console.error("Signup failed:", text);
         // Could show error modal here logic if desired

@@ -18,6 +18,7 @@ interface CustomModalProps {
 }
 
 const CustomModal = ({ isOpen, onClose, message }: CustomModalProps) => {
+  console.log("CustomModal render, isOpen:", isOpen);
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md">
       <ModalBackdrop />
