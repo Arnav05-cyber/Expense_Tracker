@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,16 +20,39 @@ public class RefreshTokenService {
     @Autowired RefreshTokenRepo refreshTokenRepo;
     @Autowired UserRepo userRepo;
 
+
+
     @Transactional
     public RefreshToken createRefreshToken(String userName) {
-        UserInfo user = userRepo.findByUserName(userName);
+        // 1. Find User
+        List<UserInfo> users = userRepo.findByUserName(userName);
+        if (users == null || users.isEmpty()) {
+            throw new RuntimeException("User not found for refresh token creation: " + userName);
+        }
+        UserInfo user = users.get(0);
+        System.out.println("RefreshTokenService: Creating token for user: " + user.getUserName() + " (ID: " + user.getUserId() + ")");
 
-        // Delete any existing refresh token for this user (FIXES DUPLICATE ISSUE)
-        refreshTokenRepo.findByUserInfo(user).ifPresent(refreshTokenRepo::delete);
+        // 2. FORCE DELETE existing token (handle duplicate constraint)
+        try {
+            Optional<RefreshToken> existing = refreshTokenRepo.findByUserInfo(user);
+            System.out.println("RefreshTokenService: Existing token found? " + existing.isPresent());
+            
+            if(existing.isPresent()){
+                refreshTokenRepo.delete(existing.get());
+            } else {
+                // Try deleting by user info anyway just in case find failed but DB has it
+                refreshTokenRepo.deleteByUserInfo(user);
+            }
+            refreshTokenRepo.flush(); // CRITICAL: Force delete before insert
+            System.out.println("RefreshTokenService: Old token deleted and flushed.");
+        } catch (Exception e) {
+            System.err.println("RefreshTokenService: Error deleting old token: " + e.getMessage());
+        }
 
+        // 3. Create New Token
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusSeconds(60 * 60 * 24 * 7))  // Changed to 7 days
+                .expiryDate(Instant.now().plusSeconds(60 * 60 * 24 * 7))
                 .userInfo(user)
                 .build();
         return refreshTokenRepo.save(refreshToken);

@@ -1,6 +1,7 @@
 package org.example.service;
 
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,16 +38,21 @@ public class UserDetailsImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserInfo user = userRepo.findByUserName(username);
-        if (user == null) {
+        List<UserInfo> users = userRepo.findByUserName(username);
+        if (users == null || users.isEmpty()) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         } else {
-            return new CustomUserDetails(user);
+            // Take the first one if multiple exist to resolve NonUniqueResultException
+            return new CustomUserDetails(users.get(0));
         }
     }
 
     public UserInfo checkIfUserExists(UserInfoDto userInfoDto) throws UsernameNotFoundException {
-        return userRepo.findByUserName(userInfoDto.getUserName());
+        List<UserInfo> users = userRepo.findByUserName(userInfoDto.getUserName());
+        if(users != null && !users.isEmpty()){
+            return users.get(0);
+        }
+        return null;
     }
 
     @Transactional

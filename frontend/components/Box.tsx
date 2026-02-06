@@ -1,14 +1,17 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
 import React from "react";
 import { Box } from "@/components/ui/box";
 
-const CustomBox = ({ style = {}, children, ...props }) => {
+interface CustomBoxProps {
+  style?: any;
+  children?: React.ReactNode;
+  [key: string]: any;
+}
+
+const CustomBox = ({ style = {}, children, ...props }: CustomBoxProps) => {
   return (
     <View>
-      <Box
-        style={[styles.headingContainer, style.mainBox, styles.styles]}
-        {...props}
-      >
+      <Box style={[styles.headingContainer, style.mainBox]} {...props}>
         <View style={styles.textColor}>{children}</View>
       </Box>
       <Box style={[styles.shadowContainer, style.shadowBox]} {...props}></Box>
@@ -28,7 +31,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   textColor: {
-    color: "white",
+    // color: "white", // Gluestack Box might handle color differently or use text color
   },
   shadowContainer: {
     position: "absolute",
@@ -38,13 +41,5 @@ const styles = StyleSheet.create({
     bottom: -5,
     backgroundColor: "grey",
     zIndex: -1,
-  },
-  mainBox: {
-    borderColor: (style) => style.mainBox?.borderColor || "black",
-    backgroundColor: (style) => style.mainBox?.backgroundColor || "black",
-  },
-
-  shadowBox: {
-    backgroundColor: (style) => style.shadowBox?.backgroundColor || "grey",
   },
 });

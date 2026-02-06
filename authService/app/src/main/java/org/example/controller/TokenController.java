@@ -17,7 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;  // Change this
+import org.springframework.web.bind.annotation.RestController;
+import java.util.List;  // Change this
 
 @RestController  // Changed from @Controller to @RestController
 public class TokenController {
@@ -26,40 +27,53 @@ public class TokenController {
     private final RefreshTokenService refreshTokenService;
     private final JwtService jwtService;
 
+    @Autowired
+    private org.example.repos.UserRepo userRepo;
+
     public TokenController(AuthenticationManager authenticationManager,
                            RefreshTokenService refreshTokenService,
-                           JwtService jwtService) {
+                           JwtService jwtService,
+                           org.example.repos.UserRepo userRepo) {
         this.authenticationManager = authenticationManager;
         this.refreshTokenService = refreshTokenService;
         this.jwtService = jwtService;
+        this.userRepo = userRepo;
     }
 
     @PostMapping("/auth/v1/login")
     public ResponseEntity<?> AuthenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequestDTO.getUserName(),
-                        authRequestDTO.getPassword()
-                )
-        );
-
-        if (authentication.isAuthenticated()) {
-            RefreshToken refreshToken =
-                    refreshTokenService.createRefreshToken(authRequestDTO.getUserName());
-
-            return new ResponseEntity<>(
-                    JwtResponseDTO.builder()
-                            .accessToken(jwtService.GenerateToken(authRequestDTO.getUserName()))
-                            .token(refreshToken.getToken())
-                            .build(),
-                    HttpStatus.OK
+        System.out.println("LOGIN ATTEMPT: " + authRequestDTO.getUserName());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequestDTO.getUserName(),
+                            authRequestDTO.getPassword()
+                    )
             );
-        } else {
-            return new ResponseEntity<>(
-                    "Exception in user service",
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
+
+            if (authentication.isAuthenticated()) {
+                System.out.println("LOGIN SUCCESS: " + authRequestDTO.getUserName());
+                RefreshToken refreshToken =
+                        refreshTokenService.createRefreshToken(authRequestDTO.getUserName());
+
+                return new ResponseEntity<>(
+                        JwtResponseDTO.builder()
+                                .accessToken(jwtService.GenerateToken(authRequestDTO.getUserName()))
+                                .token(refreshToken.getToken())
+                                .build(),
+                        HttpStatus.OK
+                );
+            } else {
+                System.out.println("LOGIN FAILED: Not Authenticated");
+                return new ResponseEntity<>(
+                        "Authentication failed",
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("LOGIN ERROR for " + authRequestDTO.getUserName() + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Auth Failed: " + e.getMessage());
         }
     }
 

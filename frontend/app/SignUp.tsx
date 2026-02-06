@@ -4,6 +4,7 @@ import {
   View,
   Pressable,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import CustomBox from "@/components/Box";
@@ -11,7 +12,6 @@ import CustomText from "@/components/CustomText";
 import { router, useNavigation } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/Config";
-import CustomModal from "@/components/Modal";
 
 const SignUp = () => {
   const [firstname, setFirstname] = useState("");
@@ -21,9 +21,11 @@ const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigateToLoginScreen = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}/auth/v1/signup`, {
         method: "POST",
@@ -43,27 +45,41 @@ const SignUp = () => {
       });
 
       const text = await response.text();
-      console.log("Raw Signup Response:", text); // Debug log
+      console.log("Raw Signup Response:", text);
 
       if (response.ok) {
-        console.log("Signup successful, setting modal true");
+        console.log("Signup successful");
         const data = JSON.parse(text);
         await AsyncStorage.setItem("accessToken", data["accessToken"]);
         await AsyncStorage.setItem("refreshToken", data["token"]);
-        setShowModal(true);
-        console.log("setShowModal called");
+
+        // Fetch userId via ping
+        try {
+          const pingRes = await fetch(`${API_URL}/ping`, {
+            headers: { Authorization: "Bearer " + data["accessToken"] },
+          });
+          if (pingRes.ok) {
+            const pingData = await pingRes.json();
+            if (pingData.userId) {
+              await AsyncStorage.setItem("userId", pingData.userId);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch userId on signup", e);
+        }
+
+        // Instant redirect to Home
+        router.replace("/Home");
       } else {
         console.error("Signup failed:", text);
-        // Could show error modal here logic if desired
+        alert("Signup Failed: " + text);
       }
     } catch (error) {
       console.error("Signup error:", error);
+      alert("Network Error: " + error);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleModalClose = () => {
-    setShowModal(false);
-    router.replace("/Home");
   };
 
   return (
@@ -120,11 +136,14 @@ const SignUp = () => {
         </CustomBox>
 
         <Pressable
-          style={styles.buttonContainer}
+          style={[styles.buttonContainer, isLoading && { opacity: 0.5 }]}
           onPress={navigateToLoginScreen}
+          disabled={isLoading}
         >
           <CustomBox style={buttonBox}>
-            <CustomText style={styles.buttonText}>Submit</CustomText>
+            <CustomText style={styles.buttonText}>
+              {isLoading ? "Signing up..." : "Submit"}
+            </CustomText>
           </CustomBox>
         </Pressable>
 
@@ -134,11 +153,6 @@ const SignUp = () => {
           </CustomBox>
         </Pressable>
       </ScrollView>
-      <CustomModal
-        isOpen={showModal}
-        onClose={handleModalClose}
-        message="Successfully Signed Up!"
-      />
     </View>
   );
 };

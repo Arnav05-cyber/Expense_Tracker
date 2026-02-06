@@ -20,6 +20,10 @@ services:
         strip_path: false
         paths:
           - /auth/v1/logout
+      - name: auth-ping
+        strip_path: false
+        paths:
+          - /ping
 
   - name: user-service
     url: http://user-service:9810

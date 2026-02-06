@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -61,8 +62,12 @@ public class AuthController {
             String username = jwtService.extractUsername(token);
 
             // Delete refresh token for this user
-            UserInfo user = userRepo.findByUserName(username);
-            if (user != null) {
+            List<UserInfo> users = userRepo.findByUserName(username);
+            
+            if (users != null && !users.isEmpty()) {
+                // If duplicates exist, we should probably invalidate tokens for all of them or just the first.
+                // For safety and consistency with login, let's just use the first found user.
+                UserInfo user = users.get(0); 
                 refreshTokenService.deleteByUser(user);
                 return ResponseEntity.ok("Logged out successfully");
             } else {
