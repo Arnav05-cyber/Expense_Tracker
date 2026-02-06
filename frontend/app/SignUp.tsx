@@ -147,7 +147,10 @@ const SignUp = () => {
           </CustomBox>
         </Pressable>
 
-        <Pressable style={styles.buttonContainer} onPress={() => router.back()}>
+        <Pressable
+          style={styles.buttonContainer}
+          onPress={() => router.push("/Login")}
+        >
           <CustomBox style={buttonBox}>
             <CustomText style={styles.buttonText}>Login</CustomText>
           </CustomBox>

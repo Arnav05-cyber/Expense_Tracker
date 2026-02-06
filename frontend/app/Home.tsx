@@ -75,6 +75,7 @@ const Home = () => {
     await AsyncStorage.removeItem("refreshToken");
     await AsyncStorage.removeItem("userId");
     await AsyncStorage.removeItem("userName");
+    await AsyncStorage.setItem("hasLoggedOut", "true"); // Flag for auto-redirect logic
     router.replace("/Login");
   };
 
@@ -95,16 +96,6 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <CustomText style={styles.headerText}>
-          Expected Expense Tracker
-        </CustomText>
-        <Pressable onPress={handleLogout}>
-          <CustomText style={styles.logoutText}>Logout</CustomText>
-        </Pressable>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -177,6 +168,22 @@ const Home = () => {
             ))
           )}
         </CustomBox>
+
+        {/* Logout Button */}
+        <Pressable
+          onPress={handleLogout}
+          style={{ marginTop: 20, alignItems: "center", marginBottom: 20 }}
+        >
+          <CustomText
+            style={{
+              color: "red",
+              textDecorationLine: "underline",
+              fontWeight: "bold",
+            }}
+          >
+            Log Out
+          </CustomText>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -348,6 +355,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "red",
   },
+  logoutButtonContainer: {
+    marginTop: 20,
+    marginBottom: 30,
+    alignItems: "center",
+  },
+  logoutButtonText: {
+    color: "red",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
   loginButton: {
     marginTop: 10,
   },
@@ -368,6 +385,22 @@ const buttonBox = {
   },
   shadowBox: {
     backgroundColor: "black",
+    borderRadius: 10,
+  },
+};
+
+const logoutBox = {
+  mainBox: {
+    backgroundColor: "#fff0f0", // Light red tint
+    borderColor: "red",
+    borderRadius: 10,
+    borderWidth: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 50, // Wider button
+    alignItems: "center",
+  },
+  shadowBox: {
+    backgroundColor: "darkred",
     borderRadius: 10,
   },
 };
