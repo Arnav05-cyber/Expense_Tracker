@@ -65,6 +65,7 @@ public class TokenController {
                 );
             } else {
                 System.out.println("LOGIN FAILED: Not Authenticated");
+                debugUsersInDb();
                 return new ResponseEntity<>(
                         "Authentication failed",
                         HttpStatus.UNAUTHORIZED
@@ -73,8 +74,34 @@ public class TokenController {
         } catch (Exception e) {
             System.err.println("LOGIN ERROR for " + authRequestDTO.getUserName() + ": " + e.getMessage());
             e.printStackTrace();
+            debugUsersInDb();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Auth Failed: " + e.getMessage());
         }
+    }
+
+    private void debugUsersInDb() {
+        System.out.println("--- DEBUGGING USERS IN DB ---");
+        try {
+            // 1. Check strict findByUserName
+            String testUser = "Arnav00"; // Hardcoded for verification based on logs, or usage if we could pass it params.
+            // But better to check what's actually there.
+            
+            Iterable<org.example.entities.UserInfo> users = userRepo.findAll();
+            int count = 0;
+            for (org.example.entities.UserInfo u : users) {
+                 System.out.println("User found (findAll): '" + u.getUserName() + "' (ID: " + u.getUserId() + ")");
+                 count++;
+                 
+                 // Test individual find
+                 List<org.example.entities.UserInfo> directFind = userRepo.findByUserName(u.getUserName());
+                 System.out.println("   -> findByUserName('" + u.getUserName() + "') returned: " + (directFind == null ? "NULL" : directFind.size() + " matches"));
+            }
+            if (count == 0) System.out.println("NO USERS FOUND IN DATABASE!");
+        } catch (Exception ex) {
+            System.err.println("Failed to list users: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        System.out.println("-----------------------------");
     }
 
     @PostMapping("/auth/v1/refreshToken")
