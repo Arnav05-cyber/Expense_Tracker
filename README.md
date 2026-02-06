@@ -157,7 +157,18 @@ The codebase is structured for easy reuse in future projects:
 
 3.  **Access APIs**:
     - Access all services via the Kong Gateway at `http://localhost:8000`.
-    - **Auth**: `/auth/v1/...`
+    - **Auth**: `/auth/v1/signup`, `/auth/v1/login`, `/auth/v1/logout`, `/ping`
     - **User**: `/user/...`
     - **Expense**: `/expense/v1/...`
     - **DS Service**: `/v1/ds/message`
+
+### 4. Troubleshooting
+
+**Common Issues:**
+
+- **401 Unauthorized on Login/Home**:
+  - Run `docker-compose down -v` to wipe the database volumes. This clears any "zombie" users or mismatched tokens.
+  - Rebuild the services: `docker-compose up --build`.
+
+- **Unique Constraint Error**:
+  - Requires a service rebuild. The latest `auth-service` code automatically handles duplicate token cleanup.
