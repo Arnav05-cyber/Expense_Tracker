@@ -9,6 +9,9 @@ from kafka import KafkaProducer
 import json
 
 app = Flask(__name__)
+import sys
+print("DS SERVICE STARTING - NEW CODE LOADED", file=sys.stderr)
+sys.stderr.flush()
 
 app.config.from_pyfile('config.py')
 
@@ -35,10 +38,22 @@ producer = get_kafka_producer()
 @app.route('/v1/ds/message', methods=['POST'])
 def handle_message():
   message = request.json.get('message')
+  user_id = request.json.get('user_id')
+  
   result = messageService.process_message(message)
-  serialized_result = result.dict()
-  producer.send('expense_service', serialized_result)
-  return jsonify(result.dict())
+  
+  if result:
+      serialized_result = result.dict()
+      # Inject user_id into the payload for expense service
+      if user_id:
+          serialized_result['user_id'] = user_id
+      
+      print(f"Sending to Kafka: {serialized_result}", file=sys.stderr)
+      sys.stderr.flush()
+      producer.send('expense_service', serialized_result)
+      return jsonify(serialized_result)
+  else:
+      return jsonify({"error": "Failed to extract expense"}), 400
 
 
 @app.route('/v1/ds/health', methods=['GET'])

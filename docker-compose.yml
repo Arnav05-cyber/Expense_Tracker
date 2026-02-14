@@ -52,6 +52,7 @@ services:
 
   user-service:
     image: user-service:latest
+    build: ./userService
     container_name: user-service
     depends_on:
       kafka:
@@ -70,6 +71,7 @@ services:
 
   auth-service:
     image: auth-service:latest
+    build: ./authService
     container_name: auth-service
     depends_on:
       kafka:
@@ -88,6 +90,7 @@ services:
 
   expense-service:
     image: expense-service:latest
+    build: ./expenseService
     container_name: expense-service
     depends_on:
       kafka:
@@ -106,11 +109,13 @@ services:
 
   ds-service:
     image: ds-service:latest
+    build: ./dsService
     container_name: ds-service
     env_file:
       - ./dsService/.env
     environment:
       FLASK_APP: app
+      PYTHONUNBUFFERED: 1
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8002:8002"

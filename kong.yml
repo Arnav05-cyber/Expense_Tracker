@@ -40,6 +40,10 @@ services:
         strip_path: false
         paths:
           - /user/getUser
+      - name: user-get-by-id
+        strip_path: false
+        paths:
+          - /user/
 
   - name: expense-service
     url: http://expense-service:9830

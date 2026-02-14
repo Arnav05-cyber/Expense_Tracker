@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -15,7 +14,7 @@ import java.sql.Timestamp;
 @Builder
 @Getter
 @Setter
-@JsonNaming(PropertyNamingStrategy.class)
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExpenseDto {
     private String externalId;
@@ -23,7 +22,7 @@ public class ExpenseDto {
     @JsonProperty(value = "amount")
     private java.math.BigDecimal amount;
 
-    @JsonProperty(value = "user_Id")
+    @JsonProperty(value = "user_id")
     private String userId;
 
     @JsonProperty(value = "merchant")

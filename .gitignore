@@ -10,6 +10,7 @@ build/
 *.hprof
 
 user_service_logs*.txt
+expense_logs.txt
 .env
 
 # Python

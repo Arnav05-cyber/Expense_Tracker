@@ -61,6 +61,7 @@ The codebase is structured for easy reuse in future projects:
 
 - **Unified Codebase**: Built with **React Native** and **Expo**, providing a native experience on both iOS and Android from a single codebase.
 - **Modern UI**: Utilizes **Gluestack UI** and **NativeWind** for a beautiful, accessible, and responsive interface.
+- **SMS Integration**: Features an intelligent SMS parser that extracts expense details from bank messages using AI.
 
 ## 🛠️ Microservices & Frontend Overview
 
@@ -78,6 +79,7 @@ The codebase is structured for easy reuse in future projects:
 
 - **Consumer**: Listens to the `userEvents` topic. When a user signs up, it automatically creates a corresponding profile in the User DB.
 - **Service Layer**: Handles business logic for creating and retrieving detailed user information.
+- **Profile API**: Exposes `GET /user/{userId}` for profile retrieval.
 
 ### C. Data Science Service (`dsService`)
 
@@ -86,15 +88,16 @@ The codebase is structured for easy reuse in future projects:
 - **Stack**: Python, Flask, Langchain.
 - **LLM Integration**: Uses **Mistral AI** (via Langchain) to parse unstructured SMS text into structured JSON data.
 - **API**: Exposes `/v1/ds/message` to accept SMS text and return structured expense objects.
-- **Producer**: Publishes extracted expense data to the `expense_service` Kafka topic.
+- **Producer**: Publishes extracted expense data (including `user_id`) to the `expense_service` Kafka topic.
 - **Port**: Runs on port `8002` (Local) / `5000` (Docker) to avoid conflicts with Kong.
 
 ### D. Expense Service (`org.example`)
 
 **Responsibility**: Core banking and transaction management.
 
-- **Consumer**: Listens to the `expense_service` topic. Receiving expense data from `dsService` and persisting it.
+- **Consumer**: Listens to the `expense_service` topic to receive extracted expenses and persist them.
 - **Database**: Stores expense records with support for multi-currency transactions.
+- **Currency**: Default currency is set to **INR (₹)**.
 
 ### E. Frontend (`frontend`)
 
@@ -109,6 +112,7 @@ The codebase is structured for easy reuse in future projects:
   - **Landing Page**: A dedicated entry point (`index.tsx`) with social links and clear navigation.
   - **Global Navigation Bar**: Persistent, themed header across all screens for consistent branding.
   - **Session Persistence**: Intelligent "Auto-Login" logic that remembers users, handles redirects, and manages logout states gracefully.
+  - **SMS Scanning**: A modal interface to paste and extract expenses from SMS texts.
 
 ## 🔧 Technical Stack
 
@@ -138,6 +142,8 @@ The codebase is structured for easy reuse in future projects:
 ### Running Locally
 
 1.  **Start Backend Services**:
+
+    **IMPORTANT**: You must use the `--build` flag to ensure the services are built from the source code, as they now include local Dockerfiles.
 
     ```bash
     docker-compose up -d --build

@@ -31,4 +31,14 @@ public class UserController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable String userId) {
+        try{
+            UserDto user = userService.getUserDetailsById(userId);
+            return ResponseEntity.ok(user);
+        }catch (Exception e){
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

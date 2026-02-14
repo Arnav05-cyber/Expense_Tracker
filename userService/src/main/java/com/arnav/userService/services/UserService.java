@@ -45,6 +45,12 @@ public class UserService {
         return mapToDto(user);
     }
 
+    public UserDto getUserDetailsById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        return mapToDto(user);
+    }
+
     private UserDto mapToDto(User user){
         return UserDto.builder()
                 .userId(user.getUserId())

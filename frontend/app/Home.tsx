@@ -1,18 +1,28 @@
-import { StyleSheet, View, Pressable, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  ScrollView,
+  Modal,
+  TextInput,
+  Alert,
+} from "react-native";
+import React, { useCallback, useState } from "react";
 import CustomBox from "@/components/Box";
 import CustomText from "@/components/CustomText";
-import { router } from "expo-router";
+import { router, useFocusEffect, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/Config";
 
 const Home = () => {
   const [userName, setUserName] = useState("User");
   const [totalExpenses, setTotalExpenses] = useState("0.00");
-  const [recentExpenses, setRecentExpenses] = useState<any[]>([]); // Using any for now to avoid interface dupe issues if kept in same file
+  const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [authError, setAuthError] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [smsText, setSmsText] = useState("");
+  const [processingSms, setProcessingSms] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -66,16 +76,37 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // setTotalSpent helper since I removed the explicit setter in state for brevity above but need it
+  // Wait, I replaced the whole file content so I should be careful.
+  // I need to define setTotalExpenses again correctly.
+
+  // Re-defining state properly
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, []),
+  );
 
   const handleLogout = async () => {
+    // Calling backend logout if possible, but for now just clear local
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (token) {
+        await fetch(`${API_URL}/auth/v1/logout`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token },
+        });
+      }
+    } catch (e) {
+      console.error("Logout error", e);
+    }
+
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
     await AsyncStorage.removeItem("userId");
     await AsyncStorage.removeItem("userName");
-    await AsyncStorage.setItem("hasLoggedOut", "true"); // Flag for auto-redirect logic
+    await AsyncStorage.setItem("hasLoggedOut", "true");
     router.replace("/Login");
   };
 
@@ -94,8 +125,121 @@ const Home = () => {
     );
   }
 
+  const handleSmsSubmit = async () => {
+    if (!smsText.trim()) return;
+
+    setProcessingSms(true);
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      const userId = await AsyncStorage.getItem("userId");
+
+      console.log("Sending SMS to DS Service:", {
+        user_id: userId,
+        message: smsText,
+      });
+
+      const response = await fetch(`${API_URL}/v1/ds/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // DS service might not check auth, but Kong might?
+          // Based on Kong config, ds-service route doesn't have auth plugin enabled,
+          // but usually good practice to send it or maybe it's open.
+          // Let's check Kong config... ds-service route has no plugins.
+        },
+        body: JSON.stringify({
+          message: smsText,
+          user_id: userId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        Alert.alert(
+          "Success",
+          `Expense extracted: ${data.amount} ${data.currency} at ${data.merchant}`,
+        );
+        setSmsText("");
+        setModalVisible(false);
+        fetchData(); // Refresh to see if it appears (might take a moment for Kafka)
+      } else {
+        const txt = await response.text();
+        Alert.alert("Error", "Failed to process SMS: " + txt);
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "Network error processing SMS");
+    } finally {
+      setProcessingSms(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable
+                onPress={() => setModalVisible(true)}
+                style={{ marginRight: 15 }}
+              >
+                <CustomText style={{ color: "white", fontSize: 14 }}>
+                  Scan SMS
+                </CustomText>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push("/Profile" as any)}
+                style={{ marginRight: 10 }}
+              >
+                <CustomText style={{ color: "white", fontSize: 14 }}>
+                  Profile
+                </CustomText>
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+
+      {/* SMS Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalCenteredView}>
+          <View style={styles.modalView}>
+            <CustomText style={styles.modalTitle}>Paste Bank SMS</CustomText>
+            <TextInput
+              style={styles.modalInput}
+              multiline
+              numberOfLines={4}
+              placeholder="Paste transaction SMS here..."
+              value={smsText}
+              onChangeText={setSmsText}
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButton, styles.buttonClose]}
+                onPress={() => setModalVisible(false)}
+              >
+                <CustomText style={styles.textStyle}>Cancel</CustomText>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButton, styles.buttonSubmit]}
+                onPress={handleSmsSubmit}
+                disabled={processingSms}
+              >
+                <CustomText style={styles.textStyle}>
+                  {processingSms ? "Processing..." : "Extract"}
+                </CustomText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -115,7 +259,7 @@ const Home = () => {
             <CustomText style={styles.balanceAmount}>...</CustomText>
           ) : (
             <CustomText style={styles.balanceAmount}>
-              ${totalExpenses}
+              ₹{totalExpenses}
             </CustomText>
           )}
         </CustomBox>
@@ -124,7 +268,7 @@ const Home = () => {
         <View style={styles.actionsContainer}>
           <Pressable
             style={styles.actionButton}
-            onPress={() => console.log("Add Expense")}
+            onPress={() => router.push("/AddExpense" as any)}
           >
             <CustomBox style={actionBox}>
               <CustomText style={styles.actionText}>+ Add</CustomText>
@@ -133,7 +277,7 @@ const Home = () => {
 
           <Pressable
             style={styles.actionButton}
-            onPress={() => console.log("View Analytics")}
+            onPress={() => router.push("/Analytics" as any)}
           >
             <CustomBox style={actionBox}>
               <CustomText style={styles.actionText}>Analytics</CustomText>
@@ -162,7 +306,7 @@ const Home = () => {
                   </CustomText>
                 </View>
                 <CustomText style={styles.amountText}>
-                  ${expense.amount.toFixed(2)}
+                  ₹{expense.amount.toFixed(2)}
                 </CustomText>
               </View>
             ))
@@ -208,11 +352,11 @@ const sectionBox = {
 
 const balanceBox = {
   mainBox: {
-    backgroundColor: "#e0e7ff", // Light indigo/blue tint for contrast
+    backgroundColor: "#e0e7ff",
     borderColor: "black",
     borderRadius: 10,
     borderWidth: 2,
-    padding: 30, // Bigger padding for emphasis
+    padding: 30,
     alignItems: "center",
     marginBottom: 20,
   },
@@ -245,7 +389,7 @@ const recentBox = {
     borderRadius: 10,
     borderWidth: 2,
     padding: 20,
-    minHeight: 200, // Give it some height
+    minHeight: 200,
   },
   shadowBox: {
     backgroundColor: "black",
@@ -257,25 +401,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50, // For safe area rough estimation
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-    paddingHorizontal: 5,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "900", // Extra bold
-  },
-  logoutText: {
-    fontSize: 14,
-    textDecorationLine: "underline",
   },
   scrollContainer: {
+    padding: 20,
     paddingBottom: 40,
   },
   welcomeText: {
@@ -355,21 +483,71 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "red",
   },
-  logoutButtonContainer: {
-    marginTop: 20,
-    marginBottom: 30,
-    alignItems: "center",
-  },
-  logoutButtonText: {
-    color: "red",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
   loginButton: {
     marginTop: 10,
   },
   buttonText: {
     fontWeight: "bold",
+  },
+  // Modal Styles
+  modalCenteredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  modalInput: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
+    textAlignVertical: "top",
+    backgroundColor: "#f9f9f9",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    width: "45%",
+    alignItems: "center",
+  },
+  buttonClose: {
+    backgroundColor: "#ff4d4d",
+  },
+  buttonSubmit: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
@@ -385,22 +563,6 @@ const buttonBox = {
   },
   shadowBox: {
     backgroundColor: "black",
-    borderRadius: 10,
-  },
-};
-
-const logoutBox = {
-  mainBox: {
-    backgroundColor: "#fff0f0", // Light red tint
-    borderColor: "red",
-    borderRadius: 10,
-    borderWidth: 2,
-    paddingVertical: 12,
-    paddingHorizontal: 50, // Wider button
-    alignItems: "center",
-  },
-  shadowBox: {
-    backgroundColor: "darkred",
     borderRadius: 10,
   },
 };

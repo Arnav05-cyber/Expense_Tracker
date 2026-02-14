@@ -2,11 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY dist/dsservice-0.1.0.tar.gz .
-RUN pip install --no-cache-dir dsservice-0.1.0.tar.gz
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ .
 
 ENV FLASK_APP=app
-
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8002
 

@@ -24,6 +24,7 @@ public class ExpenseConsumer {
     @KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
     public void listen(ExpenseDto expenseDto) {
         log.info("Received expense: {}", expenseDto);
+        log.info("Extracted User ID: {}", expenseDto.getUserId());
         expenseService.createExpense(expenseDto);
     }
 
