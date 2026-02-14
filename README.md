@@ -112,7 +112,9 @@ The codebase is structured for easy reuse in future projects:
   - **Landing Page**: A dedicated entry point (`index.tsx`) with social links and clear navigation.
   - **Global Navigation Bar**: Persistent, themed header across all screens for consistent branding.
   - **Session Persistence**: Intelligent "Auto-Login" logic that remembers users, handles redirects, and manages logout states gracefully.
-  - **SMS Scanning**: A modal interface to paste and extract expenses from SMS texts.
+  - **SMS Scanning**:
+    - **Manual**: A modal interface to paste and extract expenses from SMS texts.
+    - **Automatic**: A native **Background Service** (Headless JS) that listens for incoming bank SMS messages, extracts the data, and syncs it with the backend even when the app is closed.
 
 ## 🔧 Technical Stack
 

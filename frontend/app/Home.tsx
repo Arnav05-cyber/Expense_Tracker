@@ -13,6 +13,8 @@ import CustomText from "@/components/CustomText";
 import { router, useFocusEffect, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/Config";
+import SmsAndroid from "react-native-get-sms-android";
+import { PermissionsAndroid, Platform, DeviceEventEmitter } from "react-native";
 
 const Home = () => {
   const [userName, setUserName] = useState("User");
@@ -88,6 +90,49 @@ const Home = () => {
     }, []),
   );
 
+  // Listen for Native SMS Events (Foreground)
+  React.useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      "SMS_RECEIVED",
+      (event) => {
+        console.log("Foreground SMS Received:", event);
+        if (event && event.message) {
+          // Simple check to avoid processing junk
+          const transactionKeywords = [
+            "debited",
+            "spent",
+            "paid",
+            "sent",
+            "transfer",
+          ];
+          const isRelevant = transactionKeywords.some((keyword) =>
+            event.message.toLowerCase().includes(keyword),
+          );
+
+          if (isRelevant) {
+            processSmsText(event.message);
+          }
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Listen for Background Task Success (to refresh UI)
+  React.useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener("SMS_PROCESSED", () => {
+      console.log("Received SMS_PROCESSED event - Refreshing Data");
+      fetchData();
+      Alert.alert("New Expense", "Expense added automatically from SMS!");
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const handleLogout = async () => {
     // Calling backend logout if possible, but for now just clear local
     try {
@@ -125,30 +170,25 @@ const Home = () => {
     );
   }
 
-  const handleSmsSubmit = async () => {
-    if (!smsText.trim()) return;
+  const processSmsText = async (text: string) => {
+    if (!text.trim()) return;
 
-    setProcessingSms(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
       const userId = await AsyncStorage.getItem("userId");
 
       console.log("Sending SMS to DS Service:", {
         user_id: userId,
-        message: smsText,
+        message: text,
       });
 
       const response = await fetch(`${API_URL}/v1/ds/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // DS service might not check auth, but Kong might?
-          // Based on Kong config, ds-service route doesn't have auth plugin enabled,
-          // but usually good practice to send it or maybe it's open.
-          // Let's check Kong config... ds-service route has no plugins.
         },
         body: JSON.stringify({
-          message: smsText,
+          message: text,
           user_id: userId,
         }),
       });
@@ -161,7 +201,7 @@ const Home = () => {
         );
         setSmsText("");
         setModalVisible(false);
-        fetchData(); // Refresh to see if it appears (might take a moment for Kafka)
+        fetchData();
       } else {
         const txt = await response.text();
         Alert.alert("Error", "Failed to process SMS: " + txt);
@@ -169,9 +209,86 @@ const Home = () => {
     } catch (e) {
       console.error(e);
       Alert.alert("Error", "Network error processing SMS");
-    } finally {
-      setProcessingSms(false);
     }
+  };
+
+  const requestSmsPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.READ_SMS,
+        PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+      ]);
+
+      return (
+        granted[PermissionsAndroid.PERMISSIONS.READ_SMS] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] ===
+          PermissionsAndroid.RESULTS.GRANTED
+      );
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
+  const syncSmsExpenses = async () => {
+    if (Platform.OS !== "android") {
+      Alert.alert("Not Supported", "SMS reading is only available on Android.");
+      return;
+    }
+
+    const hasPermission = await requestSmsPermission();
+    if (!hasPermission) {
+      Alert.alert("Permission Denied", "Cannot read SMS without permission.");
+      return;
+    }
+
+    setProcessingSms(true);
+
+    const filter = {
+      box: "inbox",
+      maxCount: 20,
+    };
+
+    SmsAndroid.list(
+      JSON.stringify(filter),
+      (fail: string) => {
+        setProcessingSms(false);
+        console.log("Failed with this error: " + fail);
+        Alert.alert("Error", "Failed to access SMS inbox");
+      },
+      async (count: number, smsList: string) => {
+        console.log("Count: ", count);
+        const arr = JSON.parse(smsList);
+
+        const transactionKeywords = [
+          "debited",
+          "spent",
+          "paid",
+          "sent",
+          "transfer",
+        ];
+        const relevantSms = arr.find((sms: any) =>
+          transactionKeywords.some((keyword) =>
+            sms.body.toLowerCase().includes(keyword),
+          ),
+        );
+
+        if (relevantSms) {
+          await processSmsText(relevantSms.body);
+        } else {
+          Alert.alert("No New Expenses", "No recent transaction SMS found.");
+        }
+        setProcessingSms(false);
+      },
+    );
+  };
+
+  const handleSmsSubmit = async () => {
+    if (!smsText.trim()) return;
+    setProcessingSms(true);
+    await processSmsText(smsText);
+    setProcessingSms(false);
   };
 
   return (
@@ -180,12 +297,18 @@ const Home = () => {
         options={{
           headerRight: () => (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable onPress={syncSmsExpenses} style={{ marginRight: 15 }}>
+                <CustomText style={{ color: "white", fontSize: 14 }}>
+                  Sync SMS
+                </CustomText>
+              </Pressable>
+
               <Pressable
                 onPress={() => setModalVisible(true)}
                 style={{ marginRight: 15 }}
               >
                 <CustomText style={{ color: "white", fontSize: 14 }}>
-                  Scan SMS
+                  Manual
                 </CustomText>
               </Pressable>
               <Pressable
