@@ -29,6 +29,12 @@ jobs:
             --stack-name infrastructure-stack\
             --capabilities CAPABILITY_NAMED_IAM
 
+      - name: Print Stack Events on Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name infrastructure-stack
+
       - name: Output Infrastructure Stack Info
         run: |
           aws cloudformation describe-stacks \
