@@ -176,17 +176,17 @@ Resources:
       Port: 80
       Protocol: HTTP
       VpcId: !Ref VPC
-    PublicLoadBalancerListener:
-      Type: AWS::ElasticLoadBalancingV2::Listener
-      DependsOn:
-        - PublicLoadBalancer
-      Properties:
-        DefaultActions:
-          - Type: forward
-            TargetGroupArn: !Ref DummyTargetGroupPublic
-        LoadBalancerArn: !Ref PublicLoadBalancer
-        Port: 80
-        Protocol: HTTP
+  PublicLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - PublicLoadBalancer
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DummyTargetGroupPublic
+      LoadBalancerArn: !Ref PublicLoadBalancer
+      Port: 80
+      Protocol: HTTP
 
   ECSCluster:
     Type: AWS::ECS::Cluster
