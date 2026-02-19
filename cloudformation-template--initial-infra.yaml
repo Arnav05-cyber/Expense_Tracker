@@ -73,7 +73,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
   PublicRoute:
-    Type: AWS:EC2::Route
+    Type: AWS::EC2::Route
     DependsOn: GatewayAttachment
     Properties:
       RouteTableId: !Ref PublicRouteTable
