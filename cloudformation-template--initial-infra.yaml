@@ -102,11 +102,13 @@ Resources:
       Domain: vpc
   NatGateway1:
     Type: AWS::EC2::NatGateway
+    DependsOn: GatewayAttachment
     Properties:
       AllocationId: !GetAtt NatGateway1Attachment.AllocationId
       SubnetId: !Ref PublicSubnet1
   NatGateway2:
     Type: AWS::EC2::NatGateway
+    DependsOn: GatewayAttachment
     Properties:
       AllocationId: !GetAtt NatGateway2Attachment.AllocationId
       SubnetId: !Ref PublicSubnet2
