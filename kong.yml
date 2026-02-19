@@ -2,7 +2,7 @@ _format_version: "2.1"
 
 services:
   - name: auth-service
-    url: http://auth-service:9820
+    url: http://auth-service.expense-tracker.local:9820
     routes:
       - name: auth-signup
         strip_path: false
@@ -26,11 +26,11 @@ services:
           - /ping
 
   - name: user-service
-    url: http://user-service:9810
+    url: http://user-service.expense-tracker.local:9810
     plugins:
       - name: external-auth
         config:
-          auth_url: http://auth-service:9820/ping
+          auth_url: http://auth-service.expense-tracker.local:9820/ping
     routes:
       - name: user-create-update
         strip_path: false
@@ -46,11 +46,11 @@ services:
           - /user/
 
   - name: expense-service
-    url: http://expense-service:9830
+    url: http://expense-service.expense-tracker.local:9830
     plugins:
       - name: external-auth
         config:
-          auth_url: http://auth-service:9820/ping
+          auth_url: http://auth-service.expense-tracker.local:9820/ping
     routes:
       - name: expense-create
         strip_path: false
@@ -66,7 +66,7 @@ services:
           - /expense/v1/
 
   - name: ds-service
-    url: http://ds-service:8002
+    url: http://ds-service.expense-tracker.local:8002
     routes:
       - name: ds-message
         strip_path: false
