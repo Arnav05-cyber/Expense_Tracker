@@ -22,26 +22,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Install dependencies
+        run: |
+          cd cdk-infrastructure
+          npm install
+
       - name: Deploy infrastructure Stack
         run: |
-          aws cloudformation deploy \
-            --template-file cloudformation-template--initial-infra.yaml\
-            --stack-name infrastructure-stack\
-            --capabilities CAPABILITY_NAMED_IAM
-
-      - name: Print Stack Events on Failure
-        if: failure()
-        run: |
-          aws cloudformation describe-stack-events \
-            --stack-name infrastructure-stack
-
-      - name: Output Infrastructure Stack Info
-        run: |
-          aws cloudformation describe-stacks \
-            --stack-name infrastructure-stack \
-            --query "Stacks[0].Outputs" \
-            > infrastructure-outputs.json
-          cat infrastructure-outputs.json
+          cd cdk-infrastructure
+          npx cdk deploy --require-approval never --outputs-file ../infrastructure-outputs.json
 
       - name: Upload infrastructure outputs to S3
         env:
