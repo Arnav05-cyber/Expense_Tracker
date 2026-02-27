@@ -128,7 +128,7 @@ services:
     container_name: kong
     restart: always
     volumes:
-      - ./kong.yml:/usr/local/kong/declarative/kong.yml
+      - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
       - ./kong/plugins:/usr/local/custom/kong/plugins
     environment:
       KONG_DATABASE: "off"

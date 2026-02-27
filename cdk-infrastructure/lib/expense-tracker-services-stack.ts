@@ -249,7 +249,7 @@ export class ExpenseTrackerServices extends cdk.Stack {
         FLASK_APP: "app",
         PYTHONUNBUFFERED: "1",
         KAFKA_BOOTSTRAP_SERVERS: "kafka.expense-tracker.local:9092",
-        MISTRAL_API_KEY: "h8WPlcvQndRusniBk2kcU9qQsQQzCzOh",
+        MISTRAL_API_KEY: process.env.MISTRAL_API_KEY || "",
       },
       portMappings: [{ containerPort: 8002 }],
       logging: logDriver,
