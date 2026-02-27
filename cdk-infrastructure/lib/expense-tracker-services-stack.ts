@@ -99,7 +99,9 @@ export class ExpenseTrackerServices extends cdk.Stack {
       cpu: 512,
     });
     mysqlTaskDef.addContainer("MySQLContainer", {
-      image: ecs.ContainerImage.fromRegistry("mysql:8.0"),
+      image: ecs.ContainerImage.fromAsset(
+        path.join(__dirname, "../../mysql-init"),
+      ),
       environment: { MYSQL_ROOT_PASSWORD: "password" },
       portMappings: [{ containerPort: 3306 }],
       logging: logDriver,
