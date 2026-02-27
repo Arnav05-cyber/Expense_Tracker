@@ -30,7 +30,7 @@ jobs:
       - name: Deploy infrastructure Stack
         run: |
           cd cdk-infrastructure
-          npx cdk deploy --require-approval never --outputs-file ../infrastructure-outputs.json
+          npx cdk deploy --all --require-approval never --outputs-file ../infrastructure-outputs.json
 
       - name: Upload infrastructure outputs to S3
         env:
